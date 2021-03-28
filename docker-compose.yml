@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  npm_reader:
+    image: npm_reader
+    build: .
+    restart: always
+    container_name: npm_reader
+    volumes:
+      - ./docker_env/docker.env:/usr/src/app/.env
+    devices:
+      - /dev/ttyUSB0
+  postgres:
+    image: postgres:13.1
+    container_name: postgres
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - APP_DB_USER=docker
+      - APP_DB_PASS=docker
+      - APP_DB_NAME=docker
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - 5432:5432
+  grafana:
+    image: grafana/grafana:7.5.1-ubuntu
+    container_name: grafana
+    ports:
+      - 80:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana.ini/:/etc/grafana/grafana.ini
+# Explicitly define the persistent volume for your data storage
+volumes:
+  grafana-data:
