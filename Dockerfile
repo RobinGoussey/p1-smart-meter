@@ -2,7 +2,7 @@ FROM node:10
 #Tried using the lighter alpine version, but I couldn't find how to install serial.h
 
 WORKDIR /usr/src/app
-
+COPY wait-for-it.sh . 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)

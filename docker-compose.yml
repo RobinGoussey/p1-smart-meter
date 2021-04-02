@@ -8,8 +8,14 @@ services:
     container_name: npm_reader
     volumes:
       - ./docker_env/docker.env:/usr/src/app/.env
+      - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh
     devices:
       - /dev/ttyUSB0
+    command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "start"]
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "5"
   postgres:
     image: postgres:13.1
     container_name: postgres
@@ -29,14 +35,23 @@ services:
       - ./db:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "5"
   grafana:
     image: grafana/grafana:7.5.1-ubuntu
     container_name: grafana
     ports:
       - 80:3000
+    restart: always
     volumes:
       - grafana-data:/var/lib/grafana
       - ./docker/grafana.ini/:/etc/grafana/grafana.ini
+    logging:
+       options:
+         max-size: "5M"
+         max-file: "5"
 # Explicitly define the persistent volume for your data storage
 volumes:
   grafana-data:
