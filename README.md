@@ -24,9 +24,9 @@ docker-compose
 
 ## Deployment
 It's is build so all you have to do, is:
-´´´
+```
 docker-compose up -d
-´´´
+```
 
 This will start 3 docker containers, which starts a postgres sql database, grafana, and a nodejs container, that reads /dev/ttyUSB0.
 
