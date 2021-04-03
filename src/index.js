@@ -39,10 +39,10 @@ p1Reader.on('reading', data => {
     let tariff1kWhDelivered=data.electricity.delivered.tariff1.reading;
     let tariff2kWhDelivered=data.electricity.delivered.tariff2.reading;
     let tariffIndicator = data.electricity.tariffIndicator;
-    console.log(tariffIndicator,tariff1kWhDelivered,tariff2kWhDelivered,tariff1kWhReceived,tariff2kWhReceived)
+    //console.log(tariffIndicator,tariff1kWhDelivered,tariff2kWhDelivered,tariff1kWhReceived,tariff2kWhReceived)
     if (production === 0) {
-        console.eror("We got a problem, production is exactly 0, consumtion, production", data.electricity.received.actual.reading, data.electricity.delivered.actual.reading)
-        process.exit(1) //crash container, should restart.
+        console.warn("We got a problem, production is exactly 0, consumtion, production", data.electricity.received.actual.reading, data.electricity.delivered.actual.reading)
+        //process.exit(1) //crash container, should restart.
 
     }
     values = [(new Date()).toISOString(), production,tariff1kWhDelivered,tariff2kWhDelivered,tariff1kWhReceived,tariff2kWhReceived,tariffIndicator]
