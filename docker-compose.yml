@@ -33,6 +33,7 @@ services:
       - APP_DB_NAME=docker
     volumes:
       - ./db:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
     ports:
       - 5432:5432
     logging:
@@ -55,3 +56,4 @@ services:
 # Explicitly define the persistent volume for your data storage
 volumes:
   grafana-data:
+  pgdata:
