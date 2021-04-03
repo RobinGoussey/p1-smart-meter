@@ -1,7 +1,12 @@
 --create table
 create table if not exists production(
-    time_stamp timestamptz, -- time_stamp because some words are sql reserverd or could create weird results
-    production double precision
+    time_stamp timestamptz, -- time_stamp because some words are sql reserved or could create weird results
+    production double precision,
+    tariff1_produced double precision,
+    tariff2_produced double precision,
+    tariff1_consumed double precision,
+    tariff2_consumed double precision,
+    tariff_indicator int
 );
 
 
