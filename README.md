@@ -61,6 +61,48 @@ docker exec -it postgres psql -U root
 
 And then copy the sql in db, and paste it there.
 
+## Useful queries
+
+### Get daily kwh netto production
+This is a non optimized query #TODO. It gives you the results per day, between the first postive, and the last positive value. It gets kwh produced and consumed.
+```psql
+with cte_with_day as (
+	SELECT *, DATE(production.time_stamp) as day_column
+	FROM production
+	where production.production>0
+),
+cte_first_production as (
+	select time_stamp,day_column,tariff1_produced+tariff2_produced as produced,tariff1_consumed+tariff2_consumed as consumed,
+	ROW_NUMBER() OVER(PARTITION BY day_column
+                                 ORDER BY time_stamp) AS rn
+	from cte_with_day
+),
+cte_last_production as (
+	select time_stamp,day_column,tariff1_produced+tariff2_produced as produced,tariff1_consumed+tariff2_consumed as consumed,
+	ROW_NUMBER() OVER(PARTITION BY day_column
+					  ORDER BY time_stamp DESC) AS rn
+	from cte_with_day
+),
+cte_first_per_day_production as (
+select * from cte_first_production
+where rn = 1
+),
+cte_last_per_day_production as (
+select * from cte_last_production
+where rn = 1
+)
+
+select cte_first_per_day_production.time_stamp as start_dag, cte_last_per_day_production.time_stamp as einde_dag,
+cte_first_per_day_production.day_column,
+ROUND((cte_last_per_day_production.produced - cte_first_per_day_production.produced)::numeric,2) as productie,
+ROUND((cte_last_per_day_production.consumed - cte_first_per_day_production.consumed)::numeric,2) as consumptie,
+ROUND(((cte_last_per_day_production.produced - cte_first_per_day_production.produced)-(cte_last_per_day_production.consumed - cte_first_per_day_production.consumed))::numeric,2) as netto_productie
+from cte_first_per_day_production
+join cte_last_per_day_production on cte_first_per_day_production.day_column = cte_last_per_day_production.day_column
+
+```
+
 #Disclaimer
 It is by no means production code/secure, but we wanted to see our production/consumption live. So don't open it to the public (port forward it).
 We run it on our local network, but you cannot see grafana on the outside world.
+
