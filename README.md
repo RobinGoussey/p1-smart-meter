@@ -102,6 +102,36 @@ join cte_last_per_day_production on cte_first_per_day_production.day_column = ct
 
 ```
 
+More efficient query (change if need be) to get the consumption kwh every night (last and first postive value) 
+
+```
+With first_and_last_timestamp_cte as (
+	SELECT time_stamp,
+		round((tariff1_produced+tariff2_produced)::numeric,2) as produced,
+		round((tariff1_consumed+tariff2_consumed)::numeric,2) as consumed,
+		DATE(production.time_stamp) as day_column,
+		FIRST_VALUE(time_stamp) OVER (PARTITION BY DATE(production.time_stamp)
+                                 ORDER BY time_stamp) as first_positive_value,
+		FIRST_VALUE(time_stamp) OVER (PARTITION BY DATE(production.time_stamp)
+                                 ORDER BY time_stamp desc) as last_positive_value		 
+	FROM production
+	where production.production>0 
+),
+first_timestamp_cte_filtered as (
+	select distinct * from first_and_last_timestamp_cte
+	where time_stamp = first_positive_value
+),
+last_timestamp_cte_filtered as (
+	select distinct * from first_and_last_timestamp_cte
+	where time_stamp = last_positive_value
+)
+select last_timestamp_cte_filtered.day_column as "consumptie nacht",
+first_timestamp_cte_filtered.consumed-last_timestamp_cte_filtered.consumed as consumptie
+from first_timestamp_cte_filtered
+join last_timestamp_cte_filtered on last_timestamp_cte_filtered.day_column::date+'1 day'::interval = first_timestamp_cte_filtered.day_column::date
+```
+
+
 #Disclaimer
 It is by no means production code/secure, but we wanted to see our production/consumption live. So don't open it to the public (port forward it).
 We run it on our local network, but you cannot see grafana on the outside world.
