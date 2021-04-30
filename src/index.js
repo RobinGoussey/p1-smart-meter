@@ -24,7 +24,7 @@ const client = new Client({
     port: process.env.db_post,
 })
 client.connect()
-
+var count_0 =0;
 p1Reader.on('reading', data => {
     let production = 0;
     if (data.electricity.received.actual.reading > 0) //consuming
@@ -42,8 +42,12 @@ p1Reader.on('reading', data => {
     //console.log(tariffIndicator,tariff1kWhDelivered,tariff2kWhDelivered,tariff1kWhReceived,tariff2kWhReceived)
     if (production === 0) {
         console.warn("We got a problem, production is exactly 0, consumtion, production", data.electricity.received.actual.reading, data.electricity.delivered.actual.reading)
-        //process.exit(1) //crash container, should restart.
-
+        count_0++;
+        if(count_0>30){
+            process.exit(1) //crash container, should restart.
+        }
+    } else {
+        count_0--;
     }
     values = [(new Date()).toISOString(), production,tariff1kWhDelivered,tariff2kWhDelivered,tariff1kWhReceived,tariff2kWhReceived,tariffIndicator]
     client.query('insert into production(time_stamp,production,tariff1_produced,tariff2_produced,tariff1_consumed,tariff2_consumed,tariff_indicator) values ($1,$2,$3,$4,$5,$6,$7) returning *;', values, (err, res) => {

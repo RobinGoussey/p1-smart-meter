@@ -35,6 +35,14 @@ There you go to this project, and in the docker folder you'll see a Productie-xx
 An example of the dashboard:
 ![dashboard screenshot](img/dashboard.png)
 
+### pgadmin
+How to deploy pgadmin:
+```
+cd /tmp
+git clone git clone https://github.com/postgres/pgadmin4.git
+cd /tmp/pgadmin4
+docker build -t "pgadmin4" .
+```
 
 ## Requirements
 ### Deploying 
